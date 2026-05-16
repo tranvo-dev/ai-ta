@@ -1,0 +1,26 @@
+@use '@angular/material' as mat;
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Be Vietnam Pro', 'Roboto', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  font-family: 'Be Vietnam Pro', 'Roboto', sans-serif;
+}
+
+:root {
+  @include mat.sidenav-overrides((
+    container-shape: var(--mat-sys-corner-none)
+  ));
+}

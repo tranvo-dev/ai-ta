@@ -1,0 +1,145 @@
+<mat-sidenav-container class="container">
+
+  <!-- ── Sidebar ─────────────────────────────────────────── -->
+  <mat-sidenav
+    class="sidebar"
+    [mode]="isMobile() ? 'over' : 'side'"
+    [opened]="sidenavOpened()"
+    (openedChange)="sidenavOpened.set($event)">
+
+    <div class="sidebar-brand">
+      <div class="brand-icon-wrap">
+        <mat-icon>calculate</mat-icon>
+      </div>
+      <div>
+        <div class="brand-title">{{ 'APP_TITLE' | translate }}</div>
+        <div class="brand-sub">{{ 'APP_SUBTITLE' | translate }}</div>
+      </div>
+    </div>
+
+    <div class="sidebar-actions">
+      <button mat-flat-button class="new-btn" (click)="createNewSession()">
+        <mat-icon>add_circle</mat-icon>
+        {{ 'NEW_QUESTION' | translate }}
+      </button>
+    </div>
+
+    <div class="sessions-header">{{ 'PAST_QUESTIONS' | translate }}</div>
+
+    <nav class="sessions-nav" aria-label="Lịch sử hỏi đáp">
+      @for (session of sessions(); track session.sessionId) {
+        <div class="session-row" [class.session-active]="session.sessionId === currentSessionId()">
+          <button class="session-item" (click)="selectSession(session.sessionId)">
+            <mat-icon class="session-icon">chat_bubble_outline</mat-icon>
+            <div class="session-info">
+              <span class="session-title">{{ session.question }}</span>
+              <span class="session-date">{{ session.createdAt | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </button>
+          <button
+            mat-icon-button
+            class="delete-btn"
+            (click)="deleteSession(session.sessionId)"
+            [matTooltip]="'DELETE_SESSION' | translate">
+            <mat-icon>delete_outline</mat-icon>
+          </button>
+        </div>
+      }
+      @if (sessions().length === 0) {
+        <p class="no-sessions">{{ 'EMPTY_SESSIONS' | translate }}</p>
+      }
+    </nav>
+  </mat-sidenav>
+
+  <!-- ── Main Chat ───────────────────────────────────────── -->
+  <mat-sidenav-content class="chat-area">
+
+    @if (isMobile()) {
+      <mat-toolbar class="mobile-bar">
+        <button mat-icon-button (click)="sidenavOpened.update(v => !v)"
+                [attr.aria-label]="'MENU' | translate">
+          <mat-icon>menu</mat-icon>
+        </button>
+        <span class="mobile-title">{{ 'APP_TITLE' | translate }}</span>
+      </mat-toolbar>
+    }
+
+    <!-- Messages -->
+    <div class="messages" #messagesContainer>
+      @if (currentMessages().length === 0 && !isLoading()) {
+        <div class="empty-state">
+          <div class="empty-icon-wrap">
+            <mat-icon>school</mat-icon>
+          </div>
+          <h2>{{ 'EMPTY_CHAT_TITLE' | translate }}</h2>
+          <p>{{ 'EMPTY_CHAT_SUB' | translate }}</p>
+        </div>
+      }
+
+      @for (msg of currentMessages(); track $index) {
+        <div class="msg-row"
+             [class.msg-row-user]="msg.role === 'user'"
+             [class.msg-row-ai]="msg.role === 'assistant'">
+          <div class="msg-meta">
+            <span class="msg-sender">
+              {{ msg.role === 'user' ? ('YOU' | translate) : ('AI_TEACHER' | translate) }}
+            </span>
+            <span class="msg-time">{{ msg.timestamp | date:'HH:mm' }}</span>
+          </div>
+          @if (msg.role === 'assistant') {
+            <markdown class="msg-bubble" [data]="msg.content" katex></markdown>
+          } @else {
+            <div class="msg-bubble">{{ msg.content }}</div>
+          }
+        </div>
+      }
+
+      @if (isLoading()) {
+        <div class="msg-row msg-row-ai">
+          <div class="msg-meta">
+            <span class="msg-sender">{{ 'AI_TEACHER' | translate }}</span>
+          </div>
+          <div class="msg-bubble loading-bubble">
+            <span class="dots"><span></span><span></span><span></span></span>
+            <span class="loading-text">{{ 'LOADING' | translate }}</span>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Input bar -->
+    <div class="input-bar">
+      <mat-form-field appearance="outline" class="input-field" subscriptSizing="dynamic">
+        <textarea
+          matInput
+          cdkTextareaAutosize
+          cdkAutosizeMinRows="1"
+          cdkAutosizeMaxRows="5"
+          [placeholder]="'INPUT_PLACEHOLDER' | translate"
+          [ngModel]="inputValue()"
+          (ngModelChange)="inputValue.set($event)"
+          (keydown.enter)="onEnterKey($event)"
+          [disabled]="isLoading()">
+        </textarea>
+      </mat-form-field>
+
+      <button
+        mat-fab
+        class="mic-btn"
+        [class.mic-active]="isListening()"
+        (click)="toggleMicrophone()"
+        [matTooltip]="(isListening() ? 'MICROPHONE_STOP' : 'MICROPHONE_START') | translate">
+        <mat-icon>{{ isListening() ? 'mic_off' : 'mic' }}</mat-icon>
+      </button>
+
+      <button
+        mat-fab
+        class="send-btn"
+        (click)="sendMessage()"
+        [disabled]="!inputValue().trim() || isLoading()">
+        <mat-icon>send</mat-icon>
+      </button>
+    </div>
+
+  </mat-sidenav-content>
+</mat-sidenav-container>

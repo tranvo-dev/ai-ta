@@ -1,0 +1,22 @@
+{
+  "APP_TITLE": "Gia sư Toán AI",
+  "APP_SUBTITLE": "Trợ lý học toán thông minh",
+  "NEW_QUESTION": "Câu hỏi mới",
+  "INPUT_PLACEHOLDER": "Nhập câu hỏi toán học của bạn...",
+  "ASK_BUTTON": "Hỏi",
+  "PAST_QUESTIONS": "Lịch sử hỏi đáp",
+  "MICROPHONE_START": "Nhấn để nói",
+  "MICROPHONE_STOP": "Nhấn để dừng",
+  "MICROPHONE_NOT_SUPPORTED": "Trình duyệt không hỗ trợ nhận dạng giọng nói",
+  "ERROR_MICROPHONE": "Không thể truy cập microphone",
+  "ERROR_API": "Có lỗi xảy ra, vui lòng thử lại",
+  "LOADING": "Đang xử lý...",
+  "EMPTY_CHAT_TITLE": "Bắt đầu học toán nào!",
+  "EMPTY_CHAT_SUB": "Hãy đặt câu hỏi toán học đầu tiên của bạn",
+  "EMPTY_SESSIONS": "Chưa có câu hỏi nào",
+  "YOU": "Bạn",
+  "AI_TEACHER": "Giáo viên AI",
+  "NEW_SESSION": "Cuộc hội thoại mới",
+  "MENU": "Menu",
+  "DELETE_SESSION": "Xóa cuộc hội thoại"
+}

@@ -80,7 +80,7 @@ export class TutorComponent implements OnInit {
 
   isMobile = toSignal(
     this.breakpointObserver
-      .observe([Breakpoints.Handset])
+      .observe([Breakpoints.Handset, Breakpoints.TabletPortrait])
       .pipe(map((r) => r.matches)),
     { initialValue: false }
   );

@@ -245,6 +245,17 @@
   color: #94a3b8 !important;
 }
 
+.toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+.mobile-new-btn {
+  color: #f1f5f9 !important;
+  border-color: #f59e0b !important;
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
 .mobile-title {
   font-size: 0.9375rem;
   font-weight: 700;

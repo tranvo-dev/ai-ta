@@ -85,6 +85,10 @@
           <mat-icon>menu</mat-icon>
         </button>
         <span class="mobile-title">{{ 'APP_TITLE' | translate }}</span>
+        <span class="toolbar-spacer"></span>
+        <button mat-stroked-button class="mobile-new-btn" (click)="createNewSession()">
+          {{ 'NEW_QUESTION' | translate }}
+        </button>
       </mat-toolbar>
     }
 

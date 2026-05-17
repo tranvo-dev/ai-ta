@@ -49,6 +49,30 @@
         <p class="no-sessions">{{ 'EMPTY_SESSIONS' | translate }}</p>
       }
     </nav>
+
+    <!-- Profile -->
+    <div class="profile-section">
+      <button class="profile-btn" [matMenuTriggerFor]="profileMenu">
+        <img
+          class="profile-avatar"
+          [src]="authService.currentUser()?.picture"
+          [alt]="authService.currentUser()?.name"
+          referrerpolicy="no-referrer" />
+        <span class="profile-name">{{ authService.currentUser()?.name }}</span>
+        <mat-icon class="profile-more">more_vert</mat-icon>
+      </button>
+
+      <mat-menu #profileMenu="matMenu" yPosition="above">
+        <div class="profile-menu-header" mat-menu-item disabled>
+          <span class="profile-menu-email">{{ authService.currentUser()?.email }}</span>
+        </div>
+        <button mat-menu-item (click)="logout()">
+          <mat-icon>logout</mat-icon>
+          <span>{{ 'LOGOUT' | translate }}</span>
+        </button>
+      </mat-menu>
+    </div>
+
   </mat-sidenav>
 
   <!-- ── Main Chat ───────────────────────────────────────── -->

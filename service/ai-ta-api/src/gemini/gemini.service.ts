@@ -37,7 +37,7 @@ export class GeminiService {
         return this.sessions.get(sessionId)!;
     }
 
-    async generateResponse(body: MessageDto) {
+    async generateResponse(body: MessageDto, _userId: string) {
         const { message, sessionId } = body;
         if (!message || !sessionId) throw new BadRequestException('message and sessionId are required');
         try {

@@ -18,5 +18,6 @@
   "AI_TEACHER": "Giáo viên AI",
   "NEW_SESSION": "Cuộc hội thoại mới",
   "MENU": "Menu",
-  "DELETE_SESSION": "Xóa cuộc hội thoại"
+  "DELETE_SESSION": "Xóa cuộc hội thoại",
+  "LOGOUT": "Đăng xuất"
 }

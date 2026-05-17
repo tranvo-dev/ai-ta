@@ -19,6 +19,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatMenuModule } from '@angular/material/menu';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -27,6 +28,7 @@ import { firstValueFrom, map } from 'rxjs';
 import { MarkdownComponent } from 'ngx-markdown';
 import katex from 'katex';
 import { GeminiService, ChatMessage, ChatSession } from '../services/gemini.service';
+import { AuthService } from '../auth/auth.service';
 
 (window as any)['katex'] = katex;
 
@@ -49,6 +51,7 @@ const STORAGE_KEY = 'ai-ta-sessions';
     MatProgressSpinnerModule,
     MatSnackBarModule,
     MatTooltipModule,
+    MatMenuModule,
     CdkTextareaAutosize,
     TranslatePipe,
     MarkdownComponent,
@@ -58,6 +61,7 @@ export class TutorComponent implements OnInit {
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef<HTMLElement>;
 
   private geminiService = inject(GeminiService);
+  authService = inject(AuthService);
   private breakpointObserver = inject(BreakpointObserver);
   private translate = inject(TranslateService);
   private snackBar = inject(MatSnackBar);
@@ -222,6 +226,10 @@ export class TutorComponent implements OnInit {
       this.isListening.set(false);
       this.snackBar.open(this.translate.instant('ERROR_MICROPHONE'), 'OK', { duration: 3000 });
     };
+  }
+
+  logout() {
+    this.authService.logout();
   }
 
   private scrollToBottom() {

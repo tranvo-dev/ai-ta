@@ -32,8 +32,6 @@ import { AuthService } from '../auth/auth.service';
 
 (window as any)['katex'] = katex;
 
-const STORAGE_KEY = 'ai-ta-sessions';
-
 @Component({
   selector: 'app-tutor',
   templateUrl: './tutor.component.html',
@@ -73,6 +71,8 @@ export class TutorComponent implements OnInit {
   isLoading = signal(false);
   sidenavOpened = signal(true);
 
+  private loadedSessionIds = new Set<string>();
+
   currentMessages = computed(() => {
     const id = this.currentSessionId();
     return this.sessions().find((s) => s.sessionId === id)?.messages ?? [];
@@ -98,40 +98,96 @@ export class TutorComponent implements OnInit {
     });
   }
 
-  ngOnInit() {
-    this.loadFromStorage();
+  async ngOnInit() {
     this.initSpeechRecognition();
-    if (this.sessions().length === 0) {
-      this.createNewSession();
+    await this.loadSessions();
+  }
+
+  private async loadSessions() {
+    try {
+      const list = await firstValueFrom(this.geminiService.getSessions());
+      this.sessions.set(
+        list.map((s) => ({
+          sessionId: s.id,
+          question: s.title,
+          messages: [],
+          createdAt: new Date(s.createdAt),
+        }))
+      );
+      if (list.length > 0) {
+        this.currentSessionId.set(list[0].id);
+        await this.loadMessages(list[0].id);
+      } else {
+        this.currentSessionId.set(null);
+      }
+    } catch {
+      this.currentSessionId.set(null);
     }
   }
 
-  createNewSession() {
-    const session: ChatSession = {
-      sessionId: crypto.randomUUID(),
-      question: this.translate.instant('NEW_SESSION'),
-      messages: [],
-      createdAt: new Date(),
-    };
-    this.sessions.update((list) => [session, ...list]);
-    this.currentSessionId.set(session.sessionId);
-    this.saveToStorage();
-    if (this.isMobile()) this.sidenavOpened.set(false);
+  private async loadMessages(sessionId: string) {
+    if (this.loadedSessionIds.has(sessionId)) return;
+    try {
+      const msgs = await firstValueFrom(this.geminiService.getMessages(sessionId));
+      this.sessions.update((list) =>
+        list.map((s) =>
+          s.sessionId === sessionId
+            ? {
+                ...s,
+                messages: msgs.map((m) => ({
+                  role: m.role as 'user' | 'assistant',
+                  content: m.content,
+                  timestamp: new Date(m.createdAt),
+                })),
+              }
+            : s
+        )
+      );
+      this.loadedSessionIds.add(sessionId);
+    } catch {}
   }
 
-  selectSession(id: string) {
+  async createNewSession() {
+    try {
+      const s = await firstValueFrom(this.geminiService.createSession());
+      const session: ChatSession = {
+        sessionId: s.id,
+        question: s.title,
+        messages: [],
+        createdAt: new Date(s.createdAt),
+      };
+      this.sessions.update((list) => [session, ...list]);
+      this.currentSessionId.set(s.id);
+      this.loadedSessionIds.add(s.id);
+      if (this.isMobile()) this.sidenavOpened.set(false);
+    } catch {
+      this.snackBar.open(this.translate.instant('ERROR_API'), 'OK', { duration: 4000 });
+    }
+  }
+
+  async selectSession(id: string) {
     this.currentSessionId.set(id);
+    await this.loadMessages(id);
     if (this.isMobile()) this.sidenavOpened.set(false);
   }
 
-  deleteSession(id: string) {
-    const remaining = this.sessions().filter((s) => s.sessionId !== id);
-    this.sessions.set(remaining);
-    if (this.currentSessionId() === id) {
-      this.currentSessionId.set(remaining.length > 0 ? remaining[0].sessionId : null);
-      if (remaining.length === 0) this.createNewSession();
+  async deleteSession(id: string) {
+    try {
+      await firstValueFrom(this.geminiService.deleteSession(id));
+      this.loadedSessionIds.delete(id);
+      const remaining = this.sessions().filter((s) => s.sessionId !== id);
+      this.sessions.set(remaining);
+      if (this.currentSessionId() === id) {
+        if (remaining.length > 0) {
+          this.currentSessionId.set(remaining[0].sessionId);
+          await this.loadMessages(remaining[0].sessionId);
+        } else {
+          this.currentSessionId.set(null);
+        }
+      }
+    } catch {
+      this.snackBar.open(this.translate.instant('ERROR_API'), 'OK', { duration: 4000 });
     }
-    this.saveToStorage();
   }
 
   async sendMessage() {
@@ -156,7 +212,6 @@ export class TutorComponent implements OnInit {
 
     this.inputValue.set('');
     this.isLoading.set(true);
-    this.saveToStorage();
 
     try {
       const res = await firstValueFrom(this.geminiService.sendMessage(message, sessionId));
@@ -170,7 +225,6 @@ export class TutorComponent implements OnInit {
           s.sessionId === sessionId ? { ...s, messages: [...s.messages, aiMsg] } : s
         )
       );
-      this.saveToStorage();
     } catch {
       this.snackBar.open(this.translate.instant('ERROR_API'), 'OK', { duration: 4000 });
     } finally {
@@ -205,6 +259,10 @@ export class TutorComponent implements OnInit {
     }
   }
 
+  logout() {
+    this.authService.logout();
+  }
+
   private initSpeechRecognition() {
     const SR =
       (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -228,32 +286,8 @@ export class TutorComponent implements OnInit {
     };
   }
 
-  logout() {
-    this.authService.logout();
-  }
-
   private scrollToBottom() {
     const el = this.messagesContainer?.nativeElement;
     if (el) el.scrollTop = el.scrollHeight;
-  }
-
-  private saveToStorage() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.sessions()));
-    } catch {}
-  }
-
-  private loadFromStorage() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      const parsed: ChatSession[] = JSON.parse(raw);
-      parsed.forEach((s) => {
-        s.createdAt = new Date(s.createdAt);
-        s.messages.forEach((m) => (m.timestamp = new Date(m.timestamp)));
-      });
-      this.sessions.set(parsed);
-      if (parsed.length > 0) this.currentSessionId.set(parsed[0].sessionId);
-    } catch {}
   }
 }

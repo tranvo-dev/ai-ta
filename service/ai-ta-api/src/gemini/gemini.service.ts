@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI, ChatSession } from "@google/generative-ai";
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { PrismaService } from "../prisma/prisma.service";
 import { MessageDto } from "./dto/message.dto";
 
 const SYSTEM_INSTRUCTION = `
@@ -18,9 +19,12 @@ const SYSTEM_INSTRUCTION = `
 export class GeminiService {
     private genAI: GoogleGenerativeAI;
     private model: any;
-    private sessions = new Map<string, ChatSession>();
+    private chatSessions = new Map<string, ChatSession>();
 
-    constructor(private configService: ConfigService) {
+    constructor(
+        private configService: ConfigService,
+        private prisma: PrismaService,
+    ) {
         this.genAI = new GoogleGenerativeAI(
             this.configService.getOrThrow<string>('API_KEY')
         );
@@ -30,20 +34,58 @@ export class GeminiService {
         });
     }
 
-    private getOrCreateSession(sessionId: string): ChatSession {
-        if (!this.sessions.has(sessionId)) {
-            this.sessions.set(sessionId, this.model.startChat({ history: [] }));
+    private async getOrCreateChatSession(sessionId: string): Promise<ChatSession> {
+        if (this.chatSessions.has(sessionId)) {
+            return this.chatSessions.get(sessionId)!;
         }
-        return this.sessions.get(sessionId)!;
+
+        const dbMessages = await this.prisma.message.findMany({
+            where: { sessionId },
+            orderBy: { createdAt: 'asc' },
+        });
+
+        const history = dbMessages.map(m => ({
+            role: m.role === 'user' ? 'user' as const : 'model' as const,
+            parts: [{ text: m.content }],
+        }));
+
+        const chat = this.model.startChat({ history });
+        this.chatSessions.set(sessionId, chat);
+        return chat;
     }
 
-    async generateResponse(body: MessageDto, _userId: string) {
+    async generateResponse(body: MessageDto, userId: string) {
         const { message, sessionId } = body;
         if (!message || !sessionId) throw new BadRequestException('message and sessionId are required');
+
+        const session = await this.prisma.session.findFirst({
+            where: { id: sessionId, userId },
+        });
+        if (!session) throw new NotFoundException('Session not found');
+
         try {
-            const chat = this.getOrCreateSession(sessionId);
+            const chat = await this.getOrCreateChatSession(sessionId);
             const result = await chat.sendMessage(message);
-            return { message: result.response.text() };
+            const aiText = result.response.text();
+
+            const isFirst = await this.prisma.message.count({ where: { sessionId } }) === 0;
+
+            await this.prisma.message.createMany({
+                data: [
+                    { sessionId, role: 'user', content: message },
+                    { sessionId, role: 'assistant', content: aiText },
+                ],
+            });
+
+            await this.prisma.session.update({
+                where: { id: sessionId },
+                data: {
+                    updatedAt: new Date(),
+                    ...(isFirst && { title: message.slice(0, 60) }),
+                },
+            });
+
+            return { message: aiText };
         } catch (err) {
             console.error('[GEMINI SERVICE] - Error when generating response', err);
             throw err;

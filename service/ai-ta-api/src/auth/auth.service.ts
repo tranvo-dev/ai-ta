@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { PrismaService } from '../prisma/prisma.service';
 
 interface GoogleUser {
   googleId: string;
@@ -10,9 +11,23 @@ interface GoogleUser {
 
 @Injectable()
 export class AuthService {
-  constructor(private jwtService: JwtService) {}
+  constructor(
+    private jwtService: JwtService,
+    private prisma: PrismaService,
+  ) {}
 
-  login(user: GoogleUser): { access_token: string } {
+  async login(user: GoogleUser): Promise<{ access_token: string }> {
+    await this.prisma.user.upsert({
+      where: { id: user.googleId },
+      update: { name: user.name, picture: user.picture },
+      create: {
+        id: user.googleId,
+        email: user.email,
+        name: user.name,
+        picture: user.picture,
+      },
+    });
+
     const payload = {
       sub: user.googleId,
       email: user.email,

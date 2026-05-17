@@ -21,8 +21,8 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  googleAuthCallback(@Req() req: any, @Res() res: Response) {
-    const { access_token } = this.authService.login(req.user);
+  async googleAuthCallback(@Req() req: any, @Res() res: Response) {
+    const { access_token } = await this.authService.login(req.user);
     const frontendUrl = this.configService.getOrThrow<string>('FRONTEND_URL');
     res.cookie(COOKIE_NAME, access_token, {
       httpOnly: true,

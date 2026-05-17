@@ -24,10 +24,11 @@ export class AuthController {
   async googleAuthCallback(@Req() req: any, @Res() res: Response) {
     const { access_token } = await this.authService.login(req.user);
     const frontendUrl = this.configService.getOrThrow<string>('FRONTEND_URL');
+    const isProd = this.configService.get<string>('NODE_ENV') === 'production';
     res.cookie(COOKIE_NAME, access_token, {
       httpOnly: true,
-      sameSite: 'lax',
-      secure: false,
+      sameSite: isProd ? 'none' : 'lax',
+      secure: isProd,
       maxAge: COOKIE_MAX_AGE,
     });
     res.redirect(`${frontendUrl}/auth/callback`);

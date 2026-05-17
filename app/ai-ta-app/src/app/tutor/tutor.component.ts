@@ -118,7 +118,7 @@ export class TutorComponent implements OnInit {
         this.currentSessionId.set(list[0].id);
         await this.loadMessages(list[0].id);
       } else {
-        this.currentSessionId.set(null);
+        await this.createNewSession();
       }
     } catch {
       this.currentSessionId.set(null);
@@ -148,6 +148,12 @@ export class TutorComponent implements OnInit {
   }
 
   async createNewSession() {
+    this.inputValue.set('');
+    const emptySession = this.sessions().find((s) => s.messages.length === 0);
+    if (emptySession) {
+      this.currentSessionId.set(emptySession.sessionId);
+      return;
+    }
     try {
       const s = await firstValueFrom(this.geminiService.createSession());
       const session: ChatSession = {
@@ -182,7 +188,7 @@ export class TutorComponent implements OnInit {
           this.currentSessionId.set(remaining[0].sessionId);
           await this.loadMessages(remaining[0].sessionId);
         } else {
-          this.currentSessionId.set(null);
+          await this.createNewSession();
         }
       }
     } catch {

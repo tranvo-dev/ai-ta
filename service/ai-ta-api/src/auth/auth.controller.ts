@@ -5,9 +5,6 @@ import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
-const COOKIE_NAME = 'ai-ta-token';
-const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
-
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -24,14 +21,7 @@ export class AuthController {
   async googleAuthCallback(@Req() req: any, @Res() res: Response) {
     const { access_token } = await this.authService.login(req.user);
     const frontendUrl = this.configService.getOrThrow<string>('FRONTEND_URL');
-    const isProd = this.configService.get<string>('NODE_ENV') === 'production';
-    res.cookie(COOKIE_NAME, access_token, {
-      httpOnly: true,
-      sameSite: isProd ? 'none' : 'lax',
-      secure: isProd,
-      maxAge: COOKIE_MAX_AGE,
-    });
-    res.redirect(`${frontendUrl}/auth/callback`);
+    res.redirect(`${frontendUrl}/auth/callback#token=${access_token}`);
   }
 
   @Get('me')
@@ -42,7 +32,6 @@ export class AuthController {
 
   @Post('logout')
   logout(@Req() _req: Request, @Res() res: Response) {
-    res.clearCookie(COOKIE_NAME);
     res.json({ ok: true });
   }
 }

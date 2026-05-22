@@ -257,6 +257,7 @@ export class TutorComponent implements OnInit {
       this.recognition.stop();
     } else {
       try {
+        this.inputValue.set('');
         this.recognition.start();
         this.isListening.set(true);
       } catch {

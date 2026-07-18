@@ -11,15 +11,8 @@ import {
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatMenuModule } from '@angular/material/menu';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -41,15 +34,8 @@ import { AuthService } from '../auth/auth.service';
     DatePipe,
     FormsModule,
     MatSidenavModule,
-    MatToolbarModule,
-    MatButtonModule,
     MatIconModule,
-    MatInputModule,
-    MatFormFieldModule,
-    MatProgressSpinnerModule,
     MatSnackBarModule,
-    MatTooltipModule,
-    MatMenuModule,
     CdkTextareaAutosize,
     TranslatePipe,
     MarkdownComponent,
@@ -69,7 +55,8 @@ export class TutorComponent implements OnInit {
   inputValue = signal('');
   isListening = signal(false);
   isLoading = signal(false);
-  sidenavOpened = signal(true);
+  historyOpened = signal(false);
+  pendingDeleteId = signal<string | null>(null);
 
   private loadedSessionIds = new Set<string>();
 
@@ -91,10 +78,6 @@ export class TutorComponent implements OnInit {
     effect(() => {
       this.currentMessages();
       setTimeout(() => this.scrollToBottom(), 50);
-    });
-
-    effect(() => {
-      this.sidenavOpened.set(!this.isMobile());
     });
   }
 
@@ -152,6 +135,7 @@ export class TutorComponent implements OnInit {
     const emptySession = this.sessions().find((s) => s.messages.length === 0);
     if (emptySession) {
       this.currentSessionId.set(emptySession.sessionId);
+      this.historyOpened.set(false);
       return;
     }
     try {
@@ -165,7 +149,7 @@ export class TutorComponent implements OnInit {
       this.sessions.update((list) => [session, ...list]);
       this.currentSessionId.set(s.id);
       this.loadedSessionIds.add(s.id);
-      if (this.isMobile()) this.sidenavOpened.set(false);
+      this.historyOpened.set(false);
     } catch {
       this.snackBar.open(this.translate.instant('ERROR_API'), 'OK', { duration: 4000 });
     }
@@ -174,10 +158,19 @@ export class TutorComponent implements OnInit {
   async selectSession(id: string) {
     this.currentSessionId.set(id);
     await this.loadMessages(id);
-    if (this.isMobile()) this.sidenavOpened.set(false);
+    this.historyOpened.set(false);
   }
 
-  async deleteSession(id: string) {
+  askDelete(id: string) {
+    this.pendingDeleteId.set(id);
+  }
+
+  cancelDelete() {
+    this.pendingDeleteId.set(null);
+  }
+
+  async confirmDelete(id: string) {
+    this.pendingDeleteId.set(null);
     try {
       await firstValueFrom(this.geminiService.deleteSession(id));
       this.loadedSessionIds.delete(id);

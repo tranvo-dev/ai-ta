@@ -1,6 +1,46 @@
 @use '@angular/material' as mat;
-@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lexend:wght@400;500;600;700;800&display=swap');
 @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+/* ── Design tokens: "Sổ tay của Cô" ───────────────
+   Warm squared-paper (ô ly) + chalkboard green + school-violet ink.
+   Tuned for older eyes: high contrast, large type, calm colors. */
+:root {
+  --giay: #f6f1e7;        /* warm paper base */
+  --giay-dam: #efe7d6;    /* deeper paper (headers, panels) */
+  --oly: #dce4dc;         /* squared-notebook grid line */
+  --phan: #fcfbf7;        /* chalk-white cards */
+
+  --muc: #21262b;         /* ink — primary text (AAA on paper) */
+  --muc-nhat: #55606b;    /* secondary ink */
+
+  --bang: #2e6b50;        /* chalkboard green — primary action */
+  --bang-dam: #245741;    /* pressed */
+  --bang-mo: #e4efe8;     /* green tint surface */
+
+  --tim: #5b4b9e;         /* mực tím — school-violet accent */
+  --tim-mo: #ece9f6;      /* violet tint */
+
+  --nhac: #b23a2e;        /* brick red — ONLY destructive confirm */
+  --nhac-mo: #f6e6e3;
+
+  --vien: #e5ddcc;        /* hairline border on paper */
+  --do-bong: 0 0.5rem 1.5rem rgba(33, 38, 43, 0.1);
+  --do-bong-nho: 0 0.25rem 0.75rem rgba(33, 38, 43, 0.08);
+}
+
+html {
+  font-size: 19px; /* senior-first base; everything scales from here */
+}
+
+/* Step the base down on narrow phones (iPhone SE etc.) so large
+   controls never overflow — keeps proportions, avoids per-element hacks. */
+@media (max-width: 400px) {
+  html { font-size: 17.5px; }
+}
+@media (max-width: 360px) {
+  html { font-size: 16px; }
+}
 
 html,
 body {
@@ -8,15 +48,38 @@ body {
   margin: 0;
   padding: 0;
   font-family: 'Be Vietnam Pro', 'Roboto', sans-serif;
+  color: var(--muc);
+  background: var(--giay);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
 }
 
 *,
 *::before,
 *::after {
   box-sizing: border-box;
-  font-family: 'Be Vietnam Pro', 'Roboto', sans-serif;
+}
+
+/* Clear, generous focus ring for keyboard users */
+:focus-visible {
+  outline: 0.1875rem solid var(--tim);
+  outline-offset: 0.125rem;
+  border-radius: 0.375rem;
+}
+
+button {
+  font-family: 'Lexend', 'Be Vietnam Pro', sans-serif;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 :root {

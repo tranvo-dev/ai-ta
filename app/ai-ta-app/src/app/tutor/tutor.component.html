@@ -1,48 +1,59 @@
 <mat-sidenav-container class="container">
 
-  <!-- ── Sidebar ─────────────────────────────────────────── -->
+  <!-- ── History panel (opens from a clearly-labelled button) ── -->
   <mat-sidenav
-    class="sidebar"
-    [mode]="isMobile() ? 'over' : 'side'"
-    [opened]="sidenavOpened()"
-    (openedChange)="sidenavOpened.set($event)">
+    class="history-panel"
+    mode="over"
+    position="end"
+    [opened]="historyOpened()"
+    (openedChange)="historyOpened.set($event)">
 
-    <div class="sidebar-brand">
-      <div class="brand-icon-wrap">
-        <mat-icon>calculate</mat-icon>
-      </div>
-      <div>
-        <div class="brand-title">{{ 'APP_TITLE' | translate }}</div>
-        <div class="brand-sub">{{ 'APP_SUBTITLE' | translate }}</div>
-      </div>
-    </div>
-
-    <div class="sidebar-actions">
-      <button mat-flat-button class="new-btn" (click)="createNewSession()">
-        <mat-icon>add_circle</mat-icon>
-        {{ 'NEW_QUESTION' | translate }}
+    <div class="history-head">
+      <span class="history-title">{{ 'HISTORY_TITLE' | translate }}</span>
+      <button class="close-btn" type="button" (click)="historyOpened.set(false)">
+        <mat-icon>close</mat-icon>
+        <span>{{ 'CLOSE' | translate }}</span>
       </button>
     </div>
 
-    <div class="sessions-header">{{ 'PAST_QUESTIONS' | translate }}</div>
+    <button class="new-btn" type="button" (click)="createNewSession()">
+      <mat-icon>add</mat-icon>
+      <span>{{ 'NEW_QUESTION' | translate }}</span>
+    </button>
 
-    <nav class="sessions-nav" aria-label="Lịch sử hỏi đáp">
+    <nav class="sessions" aria-label="Lịch sử hỏi đáp">
       @for (session of sessions(); track session.sessionId) {
-        <div class="session-row" [class.session-active]="session.sessionId === currentSessionId()">
-          <button class="session-item" (click)="selectSession(session.sessionId)">
-            <mat-icon class="session-icon">chat_bubble_outline</mat-icon>
-            <div class="session-info">
-              <span class="session-title">{{ session.question }}</span>
-              <span class="session-date">{{ session.createdAt | date:'dd/MM/yyyy' }}</span>
+        <div class="session" [class.session-active]="session.sessionId === currentSessionId()">
+
+          @if (pendingDeleteId() === session.sessionId) {
+            <div class="confirm">
+              <span class="confirm-q">{{ 'DELETE_ASK' | translate }}</span>
+              <div class="confirm-actions">
+                <button class="keep-btn" type="button" (click)="cancelDelete()">
+                  {{ 'DELETE_NO' | translate }}
+                </button>
+                <button class="del-btn" type="button" (click)="confirmDelete(session.sessionId)">
+                  <mat-icon>delete</mat-icon>
+                  <span>{{ 'DELETE_YES' | translate }}</span>
+                </button>
+              </div>
             </div>
-          </button>
-          <button
-            mat-icon-button
-            class="delete-btn"
-            (click)="deleteSession(session.sessionId)"
-            [matTooltip]="'DELETE_SESSION' | translate">
-            <mat-icon>delete_outline</mat-icon>
-          </button>
+          } @else {
+            <button class="session-open" type="button" (click)="selectSession(session.sessionId)">
+              <mat-icon class="session-icon">menu_book</mat-icon>
+              <span class="session-info">
+                <span class="session-title">{{ session.question }}</span>
+                <span class="session-date">{{ session.createdAt | date:'dd/MM/yyyy' }}</span>
+              </span>
+            </button>
+            <button
+              class="session-del"
+              type="button"
+              (click)="askDelete(session.sessionId)"
+              [attr.aria-label]="'DELETE_SESSION' | translate">
+              <mat-icon>delete_outline</mat-icon>
+            </button>
+          }
         </div>
       }
       @if (sessions().length === 0) {
@@ -50,70 +61,52 @@
       }
     </nav>
 
-    <!-- Profile -->
-    <div class="profile-section">
-      <button class="profile-btn" [matMenuTriggerFor]="profileMenu">
-        <img
-          class="profile-avatar"
-          [src]="authService.currentUser()?.picture"
-          [alt]="authService.currentUser()?.name"
-          referrerpolicy="no-referrer" />
-        <span class="profile-name">{{ authService.currentUser()?.name }}</span>
-        <mat-icon class="profile-more">more_vert</mat-icon>
+    <div class="account">
+      <img
+        class="account-avatar"
+        [src]="authService.currentUser()?.picture"
+        [alt]="authService.currentUser()?.name"
+        referrerpolicy="no-referrer" />
+      <span class="account-name">{{ authService.currentUser()?.name }}</span>
+      <button class="logout-btn" type="button" (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>{{ 'LOGOUT' | translate }}</span>
       </button>
-
-      <mat-menu #profileMenu="matMenu" yPosition="above">
-        <div class="profile-menu-header" mat-menu-item disabled>
-          <span class="profile-menu-email">{{ authService.currentUser()?.email }}</span>
-        </div>
-        <button mat-menu-item (click)="logout()">
-          <mat-icon>logout</mat-icon>
-          <span>{{ 'LOGOUT' | translate }}</span>
-        </button>
-      </mat-menu>
     </div>
 
   </mat-sidenav>
 
-  <!-- ── Main Chat ───────────────────────────────────────── -->
-  <mat-sidenav-content class="chat-area">
+  <!-- ── Main ─────────────────────────────────────── -->
+  <mat-sidenav-content class="main">
 
-    @if (isMobile()) {
-      <mat-toolbar class="mobile-bar">
-        <button mat-icon-button (click)="sidenavOpened.update(v => !v)"
-                [attr.aria-label]="'MENU' | translate">
-          <mat-icon>menu</mat-icon>
-        </button>
-        <span class="mobile-title">{{ 'APP_TITLE' | translate }}</span>
-        <span class="toolbar-spacer"></span>
-        <button mat-stroked-button class="mobile-new-btn" (click)="createNewSession()">
-          {{ 'NEW_QUESTION' | translate }}
-        </button>
-      </mat-toolbar>
-    }
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-title">{{ 'APP_TITLE' | translate }}</span>
+        <span class="brand-sub">{{ 'APP_SUBTITLE' | translate }}</span>
+      </div>
+      <button class="history-btn" type="button" (click)="historyOpened.set(true)">
+        <mat-icon>menu_book</mat-icon>
+        <span>{{ 'PAST_QUESTIONS' | translate }}</span>
+      </button>
+    </header>
 
-    <!-- Messages -->
     <div class="messages" #messagesContainer>
       @if (currentMessages().length === 0 && !isLoading()) {
-        <div class="empty-state">
-          <div class="empty-icon-wrap">
-            <mat-icon>school</mat-icon>
-          </div>
+        <div class="empty">
+          <div class="empty-icon"><mat-icon>waving_hand</mat-icon></div>
           <h2>{{ 'EMPTY_CHAT_TITLE' | translate }}</h2>
           <p>{{ 'EMPTY_CHAT_SUB' | translate }}</p>
+          <mat-icon class="empty-arrow">south</mat-icon>
         </div>
       }
 
       @for (msg of currentMessages(); track $index) {
-        <div class="msg-row"
-             [class.msg-row-user]="msg.role === 'user'"
-             [class.msg-row-ai]="msg.role === 'assistant'">
-          <div class="msg-meta">
-            <span class="msg-sender">
-              {{ msg.role === 'user' ? ('YOU' | translate) : ('AI_TEACHER' | translate) }}
-            </span>
-            <span class="msg-time">{{ msg.timestamp | date:'HH:mm' }}</span>
-          </div>
+        <div class="msg"
+             [class.msg-user]="msg.role === 'user'"
+             [class.msg-ai]="msg.role === 'assistant'">
+          <span class="msg-sender">
+            {{ msg.role === 'user' ? ('YOU' | translate) : ('AI_TEACHER' | translate) }}
+          </span>
           @if (msg.role === 'assistant') {
             <markdown class="msg-bubble" [data]="msg.content" katex></markdown>
           } @else {
@@ -123,50 +116,55 @@
       }
 
       @if (isLoading()) {
-        <div class="msg-row msg-row-ai">
-          <div class="msg-meta">
-            <span class="msg-sender">{{ 'AI_TEACHER' | translate }}</span>
-          </div>
-          <div class="msg-bubble loading-bubble">
+        <div class="msg msg-ai">
+          <span class="msg-sender">{{ 'AI_TEACHER' | translate }}</span>
+          <div class="msg-bubble loading">
             <span class="dots"><span></span><span></span><span></span></span>
-            <span class="loading-text">{{ 'LOADING' | translate }}</span>
+            <span>{{ 'LOADING' | translate }}</span>
           </div>
         </div>
       }
     </div>
 
-    <!-- Input bar -->
-    <div class="input-bar">
-      <mat-form-field appearance="outline" class="input-field" subscriptSizing="dynamic">
-        <textarea
-          matInput
-          cdkTextareaAutosize
-          cdkAutosizeMinRows="1"
-          cdkAutosizeMaxRows="5"
-          [placeholder]="'INPUT_PLACEHOLDER' | translate"
-          [ngModel]="inputValue()"
-          (ngModelChange)="inputValue.set($event)"
-          (keydown.enter)="onEnterKey($event)"
-          [disabled]="isLoading()">
-        </textarea>
-      </mat-form-field>
+    <!-- ── Composer: voice-first ──────────────────── -->
+    <div class="composer">
+      <textarea
+        class="composer-input"
+        cdkTextareaAutosize
+        cdkAutosizeMinRows="2"
+        cdkAutosizeMaxRows="4"
+        [placeholder]="'INPUT_PLACEHOLDER' | translate"
+        [ngModel]="inputValue()"
+        (ngModelChange)="inputValue.set($event)"
+        (keydown.enter)="onEnterKey($event)"
+        [disabled]="isLoading()"></textarea>
 
-      <button
-        mat-fab
-        class="mic-btn"
-        [class.mic-active]="isListening()"
-        (click)="toggleMicrophone()"
-        [matTooltip]="(isListening() ? 'MICROPHONE_STOP' : 'MICROPHONE_START') | translate">
-        <mat-icon>{{ isListening() ? 'mic_off' : 'mic' }}</mat-icon>
-      </button>
+      @if (isListening()) {
+        <p class="mic-hint">{{ 'MIC_HINT' | translate }}</p>
+      }
 
-      <button
-        mat-fab
-        class="send-btn"
-        (click)="sendMessage()"
-        [disabled]="!inputValue().trim() || isLoading()">
-        <mat-icon>send</mat-icon>
-      </button>
+      <div class="composer-buttons">
+        <button
+          class="mic-btn"
+          type="button"
+          [class.mic-on]="isListening()"
+          [attr.aria-pressed]="isListening()"
+          (click)="toggleMicrophone()">
+          <mat-icon>{{ isListening() ? 'stop' : 'mic' }}</mat-icon>
+          <span>{{ (isListening() ? 'MIC_LISTENING' : 'MIC_IDLE') | translate }}</span>
+        </button>
+
+        @if (inputValue().trim()) {
+          <button
+            class="send-btn"
+            type="button"
+            (click)="sendMessage()"
+            [disabled]="isLoading()">
+            <span>{{ 'SEND' | translate }}</span>
+            <mat-icon>arrow_forward</mat-icon>
+          </button>
+        }
+      </div>
     </div>
 
   </mat-sidenav-content>

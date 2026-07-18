@@ -1,23 +1,43 @@
 {
-  "APP_TITLE": "AITA",
-  "APP_SUBTITLE": "Trợ lý học toán thông minh",
-  "NEW_QUESTION": "Câu hỏi mới",
-  "INPUT_PLACEHOLDER": "Nhập câu hỏi toán học của bạn...",
-  "ASK_BUTTON": "Hỏi",
-  "PAST_QUESTIONS": "Lịch sử hỏi đáp",
-  "MICROPHONE_START": "Nhấn để nói",
-  "MICROPHONE_STOP": "Nhấn để dừng",
-  "MICROPHONE_NOT_SUPPORTED": "Trình duyệt không hỗ trợ nhận dạng giọng nói",
-  "ERROR_MICROPHONE": "Không thể truy cập microphone",
-  "ERROR_API": "Có lỗi xảy ra, vui lòng thử lại",
-  "LOADING": "Đang xử lý...",
-  "EMPTY_CHAT_TITLE": "Bắt đầu học toán nào!",
-  "EMPTY_CHAT_SUB": "Hãy đặt câu hỏi toán học đầu tiên của bạn",
-  "EMPTY_SESSIONS": "Chưa có câu hỏi nào",
-  "YOU": "Bạn",
-  "AI_TEACHER": "Giáo viên AI",
-  "NEW_SESSION": "Cuộc hội thoại mới",
+  "BRAND": "AITA",
+  "APP_TITLE": "Sổ tay của Cô",
+  "APP_SUBTITLE": "Cùng Cô soạn bài và giải toán",
+
+  "WELCOME_TITLE": "Kính chào Cô",
+  "WELCOME_SUB": "Trợ lý giúp Cô giải những bài toán khó để soạn bài cho học sinh lớp 6–9. Cô cứ nói, tôi sẽ giải từng bước rõ ràng.",
+  "LOGIN_BUTTON": "Đăng nhập với Google",
+  "LOGIN_REASSURE": "Miễn phí. Không cần cài đặt gì thêm.",
+
+  "NEW_QUESTION": "Soạn bài mới",
+  "PAST_QUESTIONS": "Bài đã hỏi",
+  "HISTORY_TITLE": "Những bài Cô đã hỏi",
+  "CLOSE": "Đóng",
+
+  "MIC_IDLE": "Bấm để nói",
+  "MIC_LISTENING": "Đang nghe… Bấm để dừng",
+  "MIC_HINT": "Cô cứ nói, tôi đang nghe",
+  "OR_TYPE": "hoặc gõ câu hỏi",
+  "INPUT_PLACEHOLDER": "Gõ câu hỏi ở đây…",
+  "SEND": "Gửi",
+
+  "EMPTY_CHAT_TITLE": "Cô muốn hỏi bài gì ạ?",
+  "EMPTY_CHAT_SUB": "Bấm nút xanh phía dưới rồi đọc đề bài. Tôi sẽ giải từng bước để Cô giảng cho các em.",
+  "EMPTY_SESSIONS": "Chưa có bài nào. Cô bấm “Soạn bài mới” để bắt đầu.",
+
+  "YOU": "Câu hỏi của Cô",
+  "AI_TEACHER": "Lời giải",
+  "LOADING": "Đang giải, Cô đợi một chút…",
+
+  "DELETE_ASK": "Xóa bài này?",
+  "DELETE_YES": "Xóa",
+  "DELETE_NO": "Giữ lại",
+  "DELETE_SESSION": "Xóa bài",
+
+  "ACCOUNT": "Tài khoản",
+  "LOGOUT": "Đăng xuất",
   "MENU": "Menu",
-  "DELETE_SESSION": "Xóa cuộc hội thoại",
-  "LOGOUT": "Đăng xuất"
+
+  "MICROPHONE_NOT_SUPPORTED": "Điện thoại chưa hỗ trợ nói. Cô gõ câu hỏi giúp tôi nhé.",
+  "ERROR_MICROPHONE": "Chưa nghe được. Cô kiểm tra micro rồi thử lại nhé.",
+  "ERROR_API": "Có trục trặc nhỏ. Cô thử lại giúp tôi nhé."
 }

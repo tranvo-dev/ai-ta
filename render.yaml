@@ -1,6 +1,7 @@
 databases:
   - name: ai-ta-db
     plan: free
+    region: singapore
     databaseName: ai_ta
     postgresMajorVersion: "16"
 

@@ -250,6 +250,81 @@
   .katex-display { margin: 0.6em 0; overflow-x: auto; overflow-y: hidden; }
 }
 
+/* ── Send error — red box under the failed question ── */
+.send-error {
+  align-self: stretch;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.55rem 0.75rem;
+  margin-top: 0.55rem;
+  padding: 0.85rem 1rem;
+  background: var(--nhac-mo);
+  border: 0.09375rem solid rgba(178, 58, 46, 0.35);
+  border-radius: 1rem;
+  text-align: left;
+}
+
+.send-error-icon {
+  flex-shrink: 0;
+  margin-top: 0.05rem;
+  color: var(--nhac);
+  font-size: 1.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.send-error-body {
+  flex: 1 1 11rem;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.send-error-title {
+  font-family: 'Lexend', sans-serif;
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--nhac);
+}
+
+.send-error-hint {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--muc);
+}
+
+.retry-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  margin-left: auto;
+  border: none;
+  border-radius: 0.85rem;
+  background: var(--bang);
+  color: var(--phan);
+  font-size: 1rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+
+  mat-icon {
+    flex-shrink: 0;
+    font-size: 1.3rem;
+    width: 1.3rem;
+    height: 1.3rem;
+  }
+
+  &:hover { background: var(--bang-dam); }
+  &:active { transform: scale(0.98); }
+  &:disabled { opacity: 0.5; cursor: default; }
+}
+
 /* ── Loading ──────────────────────────────────── */
 .loading {
   display: flex;
@@ -284,11 +359,16 @@
   box-shadow: 0 -0.25rem 1rem rgba(33, 38, 43, 0.05);
 }
 
+.composer-field {
+  position: relative;
+  display: flex;
+}
+
 .composer-input {
   display: block;
   width: 100%;
   resize: none;
-  overflow-y: hidden; /* cdkTextareaAutosize manages height — no phantom scrollbar */
+  overflow: hidden; /* collapsed: crop long text — that triggers full-screen expand */
   border: 0.125rem solid var(--vien);
   border-radius: 1rem;
   padding: 0.8rem 1rem;
@@ -302,6 +382,59 @@
   &::placeholder { color: var(--muc-nhat); opacity: 0.85; }
   &:focus { outline: none; border-color: var(--bang); }
   &:disabled { opacity: 0.6; }
+}
+
+/* ── Full-screen compose: the whole question on one page ── */
+.composer-expanded {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  background: var(--phan);
+}
+
+.compose-head {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 0.9rem 1rem 0.7rem;
+}
+
+.compose-title {
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--tim);
+}
+
+.composer-expanded .composer-field {
+  flex: 1;
+  min-height: 0;
+  padding: 1rem;
+}
+
+.composer-expanded .composer-input {
+  height: 100%;
+  overflow-y: auto; /* single, roomy scroll only if the question exceeds a full page */
+  border-radius: 1rem;
+  font-size: 1.2rem;
+  line-height: 1.7;
+  background: var(--giay);
+}
+
+.composer-expanded .composer-buttons {
+  flex-shrink: 0;
+  margin-top: 0;
+  padding: 0.75rem 1rem 1rem;
+  border-top: 0.0625rem solid var(--vien);
+}
+
+.composer-expanded .mic-hint {
+  padding: 0 1rem;
 }
 
 .mic-hint {

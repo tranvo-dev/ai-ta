@@ -112,6 +112,20 @@
           } @else {
             <div class="msg-bubble">{{ msg.content }}</div>
           }
+
+          @if (msg.error) {
+            <div class="send-error" role="alert">
+              <mat-icon class="send-error-icon">error_outline</mat-icon>
+              <div class="send-error-body">
+                <span class="send-error-title">{{ 'ERROR_SEND_TITLE' | translate }}</span>
+                <span class="send-error-hint">{{ 'ERROR_SEND_HINT' | translate }}</span>
+              </div>
+              <button class="retry-btn" type="button" (click)="retry(msg.content)" [disabled]="isLoading()">
+                <mat-icon>refresh</mat-icon>
+                <span>{{ 'RETRY' | translate }}</span>
+              </button>
+            </div>
+          }
         </div>
       }
 
@@ -126,18 +140,25 @@
       }
     </div>
 
-    <!-- ── Composer: voice-first ──────────────────── -->
-    <div class="composer">
-      <textarea
-        class="composer-input"
-        cdkTextareaAutosize
-        cdkAutosizeMinRows="2"
-        cdkAutosizeMaxRows="4"
-        [placeholder]="'INPUT_PLACEHOLDER' | translate"
-        [ngModel]="inputValue()"
-        (ngModelChange)="inputValue.set($event)"
-        (keydown.enter)="onEnterKey($event)"
-        [disabled]="isLoading()"></textarea>
+    <!-- ── Composer: voice-first; grows to full screen for long questions ── -->
+    <div class="composer" [class.composer-expanded]="composeExpanded()">
+
+      @if (composeExpanded()) {
+        <div class="compose-head">
+          <span class="compose-title">{{ 'YOU' | translate }}</span>
+        </div>
+      }
+
+      <div class="composer-field">
+        <textarea
+          class="composer-input"
+          rows="2"
+          [placeholder]="'INPUT_PLACEHOLDER' | translate"
+          [ngModel]="inputValue()"
+          (ngModelChange)="inputValue.set($event)"
+          (keydown.enter)="onEnterKey($event)"
+          [disabled]="isLoading()"></textarea>
+      </div>
 
       @if (isListening()) {
         <p class="mic-hint">{{ 'MIC_HINT' | translate }}</p>

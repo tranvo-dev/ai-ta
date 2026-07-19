@@ -37,7 +37,7 @@
   "LOGOUT": "Đăng xuất",
   "MENU": "Menu",
 
-  "MICROPHONE_NOT_SUPPORTED": "Điện thoại chưa hỗ trợ nói. Cô gõ câu hỏi giúp tôi nhé.",
-  "ERROR_MICROPHONE": "Chưa nghe được. Cô kiểm tra micro rồi thử lại nhé.",
-  "ERROR_API": "Có trục trặc nhỏ. Cô thử lại giúp tôi nhé."
+  "ERROR_SEND_TITLE": "Chưa gửi được câu hỏi",
+  "ERROR_SEND_HINT": "Cô thử nói lại, gõ lại, hoặc đợi một lát rồi bấm Thử lại.",
+  "RETRY": "Thử lại"
 }

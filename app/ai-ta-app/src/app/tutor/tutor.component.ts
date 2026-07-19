@@ -12,10 +12,8 @@ import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { firstValueFrom, map } from 'rxjs';
 import { MarkdownComponent } from 'ngx-markdown';
@@ -35,8 +33,6 @@ import { AuthService } from '../auth/auth.service';
     FormsModule,
     MatSidenavModule,
     MatIconModule,
-    MatSnackBarModule,
-    CdkTextareaAutosize,
     TranslatePipe,
     MarkdownComponent,
   ],
@@ -47,8 +43,6 @@ export class TutorComponent implements OnInit {
   private geminiService = inject(GeminiService);
   authService = inject(AuthService);
   private breakpointObserver = inject(BreakpointObserver);
-  private translate = inject(TranslateService);
-  private snackBar = inject(MatSnackBar);
 
   sessions = signal<ChatSession[]>([]);
   currentSessionId = signal<string | null>(null);
@@ -57,6 +51,9 @@ export class TutorComponent implements OnInit {
   isLoading = signal(false);
   historyOpened = signal(false);
   pendingDeleteId = signal<string | null>(null);
+
+  /** Composing takes over the whole screen as soon as she speaks or types. */
+  composeExpanded = computed(() => this.isListening() || this.inputValue().trim().length > 0);
 
   private loadedSessionIds = new Set<string>();
 
@@ -150,9 +147,7 @@ export class TutorComponent implements OnInit {
       this.currentSessionId.set(s.id);
       this.loadedSessionIds.add(s.id);
       this.historyOpened.set(false);
-    } catch {
-      this.snackBar.open(this.translate.instant('ERROR_API'), 'OK', { duration: 4000 });
-    }
+    } catch {}
   }
 
   async selectSession(id: string) {
@@ -184,9 +179,7 @@ export class TutorComponent implements OnInit {
           await this.createNewSession();
         }
       }
-    } catch {
-      this.snackBar.open(this.translate.instant('ERROR_API'), 'OK', { duration: 4000 });
-    }
+    } catch {}
   }
 
   async sendMessage() {
@@ -210,25 +203,54 @@ export class TutorComponent implements OnInit {
     );
 
     this.inputValue.set('');
-    this.isLoading.set(true);
+    await this.requestAnswer(sessionId, message);
+  }
 
+  /** Retry a question that failed to send. */
+  async retry(content: string) {
+    const sessionId = this.currentSessionId();
+    if (!sessionId || this.isLoading()) return;
+    await this.requestAnswer(sessionId, content);
+  }
+
+  private async requestAnswer(sessionId: string, content: string) {
+    this.isLoading.set(true);
     try {
-      const res = await firstValueFrom(this.geminiService.sendMessage(message, sessionId));
-      const aiMsg: ChatMessage = {
-        role: 'assistant',
-        content: res.message,
-        timestamp: new Date(),
-      };
+      const res = await firstValueFrom(this.geminiService.sendMessage(content, sessionId));
+      const aiMsg: ChatMessage = { role: 'assistant', content: res.message, timestamp: new Date() };
+      // success — clear any error flag and append the answer
       this.sessions.update((list) =>
         list.map((s) =>
-          s.sessionId === sessionId ? { ...s, messages: [...s.messages, aiMsg] } : s
+          s.sessionId === sessionId
+            ? {
+                ...s,
+                messages: [
+                  ...s.messages.map((m) => (m.error ? { ...m, error: false } : m)),
+                  aiMsg,
+                ],
+              }
+            : s
         )
       );
     } catch {
-      this.snackBar.open(this.translate.instant('ERROR_API'), 'OK', { duration: 4000 });
+      // failure — flag the most recent question so the chat shows a retry box
+      this.sessions.update((list) =>
+        list.map((s) => (s.sessionId === sessionId ? { ...s, messages: this.flagLastQuestion(s.messages) } : s))
+      );
     } finally {
       this.isLoading.set(false);
     }
+  }
+
+  private flagLastQuestion(messages: ChatMessage[]): ChatMessage[] {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === 'user') {
+        const copy = [...messages];
+        copy[i] = { ...copy[i], error: true };
+        return copy;
+      }
+    }
+    return messages;
   }
 
   onEnterKey(event: Event) {
@@ -240,12 +262,7 @@ export class TutorComponent implements OnInit {
   }
 
   toggleMicrophone() {
-    if (!this.recognition) {
-      this.snackBar.open(this.translate.instant('MICROPHONE_NOT_SUPPORTED'), 'OK', {
-        duration: 3000,
-      });
-      return;
-    }
+    if (!this.recognition) return;
     if (this.isListening()) {
       this.recognition.stop();
     } else {
@@ -280,10 +297,7 @@ export class TutorComponent implements OnInit {
       this.inputValue.set(text);
     };
     this.recognition.onend = () => this.isListening.set(false);
-    this.recognition.onerror = () => {
-      this.isListening.set(false);
-      this.snackBar.open(this.translate.instant('ERROR_MICROPHONE'), 'OK', { duration: 3000 });
-    };
+    this.recognition.onerror = () => this.isListening.set(false);
   }
 
   private scrollToBottom() {

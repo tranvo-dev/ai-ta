@@ -1,8 +1,10 @@
-# Sổ tay của Cô 📚
+# AITA - Sổ tay của Cô 📚
 
 > An AI math tutor assistant for Vietnamese teachers — speak or type a problem, get a clear step-by-step solution to share with your class.
 
-Built for grades 6–9 math teachers. Voice-first, large text, high contrast. Works on mobile.
+Built for grades 6–9 math teachers. Voice-first, large text, high contrast. 
+
+Available on both desktop and mobile.
 
 ## What it does
 
@@ -12,9 +14,9 @@ A teacher says or types a hard math problem. The app sends it to Gemini and retu
 - **Voice** — tap the green button, speak the problem out loud
 - **Text** — type it in the box and hit Send
 
-|                                      |                                             |                                                  |                                                 |
-|--------------------------------------|---------------------------------------------|--------------------------------------------------|-------------------------------------------------|
-| ![Home screen](screenshots/home.PNG) | ![Voice input](screenshots/input_voice.PNG) | ![Typing a question](screenshots/input_text.PNG) | ![Getting the answer](screenshots/response.PNG) |
+|                                      |                                             |                                                  |                                                 |                                               |
+|--------------------------------------|---------------------------------------------|--------------------------------------------------|-------------------------------------------------|-----------------------------------------------|
+| ![Home screen](screenshots/home.PNG) | ![Voice input](screenshots/input_voice.PNG) | ![Typing a question](screenshots/input_text.PNG) | ![Getting the answer](screenshots/response.PNG) | ![List of the question](screenshots/list.PNG) |
 
 
 ## Tech stack

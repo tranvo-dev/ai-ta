@@ -1,0 +1,6 @@
+# Code owners for book-app
+# These owners are the default owners for everything in the repo
+# and will be requested for review on every pull request.
+# Docs: https://docs.github.com/articles/about-code-owners
+
+* @tranvo-dev

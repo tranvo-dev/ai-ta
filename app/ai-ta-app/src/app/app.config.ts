@@ -13,7 +13,7 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideHttpClient(withInterceptors([authInterceptor])),
-    provideTranslateService({ defaultLanguage: 'vi' }),
+    provideTranslateService({ lang: 'vi' }),
     ...provideTranslateHttpLoader({ prefix: '/assets/i18n/', suffix: '.json' }),
     provideAppInitializer(() => inject(TranslateService).use('vi')),
     provideMarkdown(),

@@ -1,7 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { normalizeLatexDelimiters } from './latex';
 
 export interface ChatMessage {
   role: 'user' | 'assistant';
@@ -37,7 +38,9 @@ export class GeminiService {
   private readonly api = environment.apiUrl;
 
   sendMessage(message: string, sessionId: string): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(this.api, { message, sessionId });
+    return this.http
+      .post<{ message: string }>(this.api, { message, sessionId })
+      .pipe(map((res) => ({ ...res, message: normalizeLatexDelimiters(res.message) })));
   }
 
   getSessions(): Observable<SessionSummary[]> {
@@ -49,7 +52,13 @@ export class GeminiService {
   }
 
   getMessages(sessionId: string): Observable<ApiMessage[]> {
-    return this.http.get<ApiMessage[]>(`${this.api}/sessions/${sessionId}/messages`);
+    return this.http.get<ApiMessage[]>(`${this.api}/sessions/${sessionId}/messages`).pipe(
+      map((msgs) =>
+        msgs.map((m) =>
+          m.role === 'assistant' ? { ...m, content: normalizeLatexDelimiters(m.content) } : m
+        )
+      )
+    );
   }
 
   deleteSession(sessionId: string): Observable<{ ok: boolean }> {

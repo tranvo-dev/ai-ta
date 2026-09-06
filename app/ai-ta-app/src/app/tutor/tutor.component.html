@@ -108,7 +108,7 @@
             {{ msg.role === 'user' ? ('YOU' | translate) : ('AI_TEACHER' | translate) }}
           </span>
           @if (msg.role === 'assistant') {
-            <markdown class="msg-bubble" [data]="msg.content" katex></markdown>
+            <app-math-markdown class="msg-bubble" [data]="msg.content" />
           } @else {
             <div class="msg-bubble">{{ msg.content }}</div>
           }

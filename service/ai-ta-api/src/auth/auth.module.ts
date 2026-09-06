@@ -9,7 +9,11 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   imports: [
-    PassportModule,
+    // register() is what actually provides AuthModuleOptions; the bare
+    // PassportModule is declared @Module({}) and provides nothing. Guards that
+    // extend AuthGuard() need it, and they lose the base class's @Optional()
+    // marking through inheritance, so it must genuinely be resolvable.
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -21,6 +25,8 @@ import { JwtStrategy } from './strategies/jwt.strategy';
   ],
   controllers: [AuthController],
   providers: [AuthService, GoogleStrategy, JwtStrategy],
-  exports: [JwtModule],
+  // PassportModule is exported so that modules whose controllers use
+  // JwtAuthGuard can resolve the AuthModuleOptions the guard injects.
+  exports: [JwtModule, PassportModule],
 })
 export class AuthModule {}

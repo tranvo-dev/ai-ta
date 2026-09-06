@@ -16,9 +16,9 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { TranslatePipe } from '@ngx-translate/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { firstValueFrom, map } from 'rxjs';
-import { MarkdownComponent } from 'ngx-markdown';
 import katex from 'katex';
 import { GeminiService, ChatMessage, ChatSession } from '../services/gemini.service';
+import { MathMarkdownComponent } from './math-markdown.component';
 import { AuthService } from '../auth/auth.service';
 
 (window as any)['katex'] = katex;
@@ -34,7 +34,7 @@ import { AuthService } from '../auth/auth.service';
     MatSidenavModule,
     MatIconModule,
     TranslatePipe,
-    MarkdownComponent,
+    MathMarkdownComponent,
   ],
 })
 export class TutorComponent implements OnInit {

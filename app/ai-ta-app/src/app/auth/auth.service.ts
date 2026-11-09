@@ -1,5 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
@@ -13,6 +13,14 @@ export interface User {
 
 const TOKEN_KEY = 'ai-ta-token';
 
+/** Network failure or gateway error — what Render returns while a free service is cold-starting. */
+export function isServerAsleep(err: unknown): boolean {
+  return (
+    err instanceof HttpErrorResponse &&
+    (err.status === 0 || err.status === 502 || err.status === 503 || err.status === 504)
+  );
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
@@ -21,6 +29,8 @@ export class AuthService {
   private token = signal<string | null>(localStorage.getItem(TOKEN_KEY));
   currentUser = signal<User | null>(null);
   authChecked = signal(false);
+  /** True when the last auth check failed because the server is asleep/unreachable. */
+  serverUnavailable = signal(false);
   isAuthenticated = computed(() => !!this.currentUser());
 
   getToken(): string | null {
@@ -47,9 +57,15 @@ export class AuthService {
         this.http.get<User>(`${environment.apiUrl}/auth/me`),
       );
       this.currentUser.set(user);
-    } catch {
-      this.clearToken();
-      this.currentUser.set(null);
+      this.serverUnavailable.set(false);
+    } catch (err) {
+      if (isServerAsleep(err)) {
+        // Render free tier spun the API down: keep the token, show the wait page.
+        this.serverUnavailable.set(true);
+      } else {
+        this.clearToken();
+        this.currentUser.set(null);
+      }
     } finally {
       this.authChecked.set(true);
     }

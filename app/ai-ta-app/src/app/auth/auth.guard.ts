@@ -10,6 +10,11 @@ export const authGuard: CanActivateFn = async () => {
     await auth.checkAuth();
   }
 
+  if (auth.serverUnavailable()) {
+    auth.authChecked.set(false); // re-check once the server is awake
+    return router.createUrlTree(['/khoi-dong']);
+  }
+
   if (auth.isAuthenticated()) return true;
   return router.createUrlTree(['/login']);
 };

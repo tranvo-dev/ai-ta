@@ -9,6 +9,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'khoi-dong',
+    loadComponent: () =>
+      import('./wake-up/wake-up.component').then((m) => m.WakeUpComponent),
+  },
+  {
     path: 'login',
     loadComponent: () =>
       import('./auth/login/login.component').then((m) => m.LoginComponent),

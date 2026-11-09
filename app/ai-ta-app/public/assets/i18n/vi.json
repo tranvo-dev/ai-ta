@@ -39,5 +39,15 @@
 
   "ERROR_SEND_TITLE": "Chưa gửi được câu hỏi",
   "ERROR_SEND_HINT": "Cô thử nói lại, gõ lại, hoặc đợi một lát rồi bấm Thử lại.",
-  "RETRY": "Thử lại"
+  "RETRY": "Thử lại",
+
+  "WAKE_TITLE": "Cô đợi một chút nhé!",
+  "WAKE_SUB": "Trợ lý đang thức dậy sau một lúc nghỉ ngơi. Thường chỉ mất khoảng 1 phút thôi ạ.",
+  "WAKE_STEP_1": "Đang đánh thức trợ lý…",
+  "WAKE_STEP_2": "Sắp xong rồi, Cô đợi thêm chút nữa nhé…",
+  "WAKE_STEP_3": "Hơi lâu hơn mọi khi, nhưng trợ lý vẫn đang khởi động ạ…",
+  "WAKE_TIP": "Cô không cần làm gì cả. Trang này sẽ tự mở khi trợ lý sẵn sàng.",
+  "WAKE_WHY": "Vì ứng dụng miễn phí nên khi lâu không dùng, trợ lý sẽ đi “ngủ”. Lần đầu mở lại sẽ chậm hơn một chút, các lần sau sẽ nhanh ngay.",
+  "WAKE_RETRY": "Thử lại ngay",
+  "WAKE_READY": "Xong rồi ạ! Đang mở cho Cô…"
 }

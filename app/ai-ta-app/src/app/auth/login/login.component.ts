@@ -1,5 +1,7 @@
 import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthService } from '../auth.service';
+import { ServerWakeService } from '../../wake-up/server-wake.service';
 import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
@@ -16,7 +18,7 @@ import { TranslatePipe } from '@ngx-translate/core';
         <h1>{{ 'WELCOME_TITLE' | translate }}</h1>
         <p class="welcome-sub">{{ 'WELCOME_SUB' | translate }}</p>
 
-        <button (click)="auth.login()" class="google-btn" type="button">
+        <button (click)="signIn()" class="google-btn" type="button">
           <img
             src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
             alt=""
@@ -131,4 +133,15 @@ import { TranslatePipe } from '@ngx-translate/core';
 })
 export class LoginComponent {
   auth = inject(AuthService);
+  private wake = inject(ServerWakeService);
+  private router = inject(Router);
+
+  async signIn(): Promise<void> {
+    // If the server is asleep, Google sign-in would land on Render's raw loading page.
+    if (await this.wake.isAwake(3000)) {
+      this.auth.login();
+    } else {
+      this.router.navigate(['/khoi-dong'], { queryParams: { then: 'login' } });
+    }
+  }
 }
